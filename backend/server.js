@@ -20,8 +20,10 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/terms', termRoutes);
 
-// Serve static frontend files if needed (optional since we'll run frontend with live server or directly)
-app.use(express.static('../frontend'));
+// Root route
+app.get('/', (req, res) => {
+  res.send('Collaborative Glossary API is running...');
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
