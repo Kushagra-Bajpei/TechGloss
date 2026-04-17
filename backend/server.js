@@ -8,7 +8,28 @@ import termRoutes from './routes/termRoutes.js';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// CORS Configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5500', // Common Live Server port
+  'http://127.0.0.1:5500',
+  'http://localhost:5000',
+  'http://localhost:3000'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Initialize MongoDB connection

@@ -2,6 +2,10 @@
 
 A modern, full-stack web application designed for developers to contribute and moderate technical terminology.
 
+## Deployment Links
+- **Frontend**: [https://tech-gloss-three.vercel.app/](https://tech-gloss-three.vercel.app/)
+- **Backend API**: [https://techgloss.onrender.com](https://techgloss.onrender.com)
+
 ## Features
 - **Modern UI**: Glassmorphic design with smooth transitions.
 - **Contribution System**: Users can submit new terms for review.
