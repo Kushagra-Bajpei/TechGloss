@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Technical Glossary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fa-solid fa-book-open-reader"></i> TechGloss
+            </div>
+            <div class="nav-links">
+                <a href="#" id="nav-home" class="active">Home</a>
+                <a href="#" id="nav-saved" style="display: none;">Saved Terms</a>
+                <a href="#" id="nav-admin" style="display: none;">Moderator Dashboard</a>
+            </div>
+            <div class="nav-right">
+                <div class="language-toggle">
+                    <button class="btn btn-outline btn-small" id="lang-toggle">EN / HI</button>
+                </div>
+                <div class="notifications-bell" id="notif-btn" style="display: none;">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notif-badge" id="notif-count">0</span>
+                    <div class="notif-dropdown glass-panel" id="notif-dropdown">
+                        <!-- Notifications injected here -->
+                    </div>
+                </div>
+                <div class="auth-buttons" id="auth-buttons">
+                <button class="btn btn-outline" onclick="openModal('auth-modal', 'login')">Login</button>
+                <button class="btn btn-primary" onclick="openModal('auth-modal', 'register')">Sign Up</button>
+            </div>
+            <div class="user-profile" id="user-profile" style="display: none;">
+                <span id="user-greeting">Hi, User</span>
+                <button class="btn btn-outline" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content: Home -->
+    <main id="home-section">
+        <!-- Hero Section -->
+        <header class="hero">
+            <h1>The Collaborative <span class="gradient-text">Technical Glossary</span></h1>
+            <p>Demystifying tech jargon. Built by developers, for developers.</p>
+            
+            <!-- Search & Filters -->
+            <div class="search-filter-container glass-panel">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search-input" data-t="search_placeholder" placeholder="Search for terms (e.g. API, Middleware...)">
+                </div>
+                <div class="filters">
+                    <select id="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="Web Dev">Web Dev</option>
+                        <option value="AI">AI</option>
+                        <option value="Cybersecurity">Cybersecurity</option>
+                        <option value="General">General</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="checkAuthAndOpenAddModal()">
+                        <i class="fa-solid fa-plus"></i> Add Term
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="home-grid-layout">
+            <div class="main-column">
+                <h2 class="section-title" id="feed-title" data-t="all_terms">All Technical Terms</h2>
+                <section class="terms-container" id="terms-grid">
+                    <!-- Cards injected via JS -->
+                </section>
+            </div>
+            
+            <aside class="side-column">
+                <div class="trending-panel glass-panel">
+                    <h3 data-t="trending">🔥 Trending</h3>
+                    <div id="trending-list">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+                <div class="leaderboard-panel glass-panel" style="margin-top: 2rem;">
+                    <h3 data-t="leaderboard">🏆 Top Contributors</h3>
+                    <div id="leaderboard-list">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Saved Terms Section -->
+    <main id="saved-section" style="display: none;">
+        <header class="hero">
+            <h1><span class="gradient-text" data-t="saved_title">Saved Terms</span></h1>
+            <p data-t="saved_subtitle">Your personalized library of technical knowledge.</p>
+        </header>
+        <section class="terms-container" id="saved-grid">
+            <!-- Saved Cards injected via JS -->
+        </section>
+    </main>
+
+    <!-- Main Content: Admin Dashboard -->
+    <main id="admin-section" style="display: none;">
+        <header class="hero admin-hero">
+            <h2>Moderator <span class="gradient-text">Dashboard</span></h2>
+            <p>Review and approve pending community contributions.</p>
+        </header>
+
+        <section class="analytics-row">
+            <div class="stat-card glass-panel">
+                <h4 data-t="total_users">Total Users</h4>
+                <p id="stat-users">0</p>
+            </div>
+            <div class="stat-card glass-panel">
+                <h4 data-t="total_terms">Total Terms</h4>
+                <p id="stat-terms">0</p>
+            </div>
+            <div class="stat-card glass-panel">
+                <h4 data-t="trending_cat">Top Category</h4>
+                <p id="stat-category">N/A</p>
+            </div>
+        </section>
+
+        <section class="admin-panel glass-panel">
+            <h3>Pending Terms</h3>
+            <div class="table-responsive">
+                <table id="pending-terms-table">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Definition</th>
+                            <th>Category</th>
+                            <th>Author</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-terms-body">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 3rem;">Pending Suggestions (Edits)</h3>
+            <div class="table-responsive">
+                <table id="pending-suggestions-table">
+                    <thead>
+                        <tr>
+                            <th>Original Term</th>
+                            <th>Suggested Definition</th>
+                            <th>Author</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-suggestions-body">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 3rem;">Reported Content</h3>
+            <div class="table-responsive">
+                <table id="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Reason</th>
+                            <th>Reporter</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-body">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal glass-modal">
+            <button class="close-btn" onclick="closeModal('auth-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="auth-title">Login</h2>
+            <form id="auth-form">
+                <input type="hidden" id="auth-type" value="login">
+                <div class="form-group" id="username-group" style="display: none;">
+                    <label>Username</label>
+                    <input type="text" id="auth-username" placeholder="johndoe">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="auth-email" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" required>
+                </div>
+                <!-- Role selector for demo purposes -->
+                <div class="form-group" id="role-group" style="display: none;">
+                    <label>Role</label>
+                    <select id="auth-role">
+                        <option value="user">User</option>
+                        <option value="moderator">Moderator</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="auth-submit-btn">Login</button>
+                <div class="form-footer">
+                    <p id="toggle-auth-text">Don't have an account? <a href="#" onclick="toggleAuthMode()">Sign up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Term Modal -->
+    <!-- Add Term Modal -->
+    <div class="modal-overlay" id="add-term-modal">
+        <div class="modal glass-modal">
+            <button class="close-btn" onclick="closeModal('add-term-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Add Technical Term</h2>
+            <form id="add-term-form">
+                <div class="form-group">
+                    <label>Term Name</label>
+                    <input type="text" id="term-name" required placeholder="e.g. Closure">
+                </div>
+                <div class="form-group">
+                    <label>Simple Definition</label>
+                    <textarea id="term-def" rows="3" required placeholder="Explain it simply..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Real-world Example</label>
+                    <textarea id="term-example" rows="2" required placeholder="Give a relatable example..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="term-category">
+                        <option value="Web Dev">Web Dev</option>
+                        <option value="AI">AI</option>
+                        <option value="Cybersecurity">Cybersecurity</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Submit Term</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Suggest Edit Modal -->
+    <div class="modal-overlay" id="suggest-edit-modal">
+        <div class="modal glass-modal">
+            <button class="close-btn" onclick="closeModal('suggest-edit-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Suggest Improvement</h2>
+            <form id="suggest-edit-form">
+                <input type="hidden" id="suggest-term-id">
+                <div class="form-group">
+                    <label>Suggested Definition</label>
+                    <textarea id="suggest-def" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Suggested Example</label>
+                    <textarea id="suggest-example" rows="2" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Submit Suggestion</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal glass-modal">
+            <button class="close-btn" onclick="closeModal('report-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 data-t="report_title">Report Term</h2>
+            <form id="report-form">
+                <input type="hidden" id="report-term-id">
+                <div class="form-group">
+                    <label data-t="reason">Reason for Reporting</label>
+                    <select id="report-reason">
+                        <option value="Inaccurate">Inaccurate Definition</option>
+                        <option value="Offensive">Offensive Content</option>
+                        <option value="Spam">Spam/Duplicate</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" data-t="submit_report">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Comments Modal -->
+    <div class="modal-overlay" id="comments-modal">
+        <div class="modal glass-modal" style="max-width: 600px;">
+            <button class="close-btn" onclick="closeModal('comments-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Comments & Discussion</h2>
+            <div class="comments-list" id="comments-list">
+                <!-- Injected via JS -->
+            </div>
+            <form id="comment-form" style="margin-top: 1.5rem;">
+                <input type="hidden" id="comment-term-id">
+                <div class="form-group">
+                    <textarea id="comment-text" rows="2" placeholder="Write a comment..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-small">Post Comment</button>
+            </form>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
