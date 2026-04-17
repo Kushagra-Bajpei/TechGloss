@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000/api';
+// API Configuration (Referencing global set in main.js)
+const API_URL = window.API_URL;
 
 // State
 let currentUser = JSON.parse(localStorage.getItem('user')) || null;
@@ -101,19 +102,7 @@ function updateUI() {
     }
 }
 
-function switchTab(tab) {
-    if (tab === 'home') {
-        homeSection.style.display = 'block';
-        adminSection.style.display = 'none';
-        navHome.classList.add('active');
-        navAdmin.classList.remove('active');
-    } else if (tab === 'admin') {
-        homeSection.style.display = 'none';
-        adminSection.style.display = 'block';
-        navHome.classList.remove('active');
-        navAdmin.classList.add('active');
-    }
-}
+// switchTab is handled by main.js globally
 
 function logout() {
     localStorage.removeItem('token');
