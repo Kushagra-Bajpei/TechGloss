@@ -1,10 +1,3 @@
-// Environment Configuration
-window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000/api'
-    : 'https://techgloss.onrender.com/api';
-
-const API_URL = window.API_URL;
-
 // DOM Elements
 const termsGrid = document.getElementById('terms-grid');
 const searchInput = document.getElementById('search-input');
