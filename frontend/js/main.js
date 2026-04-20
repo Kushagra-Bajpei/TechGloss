@@ -11,6 +11,8 @@ const notifBtn = document.getElementById('notif-btn');
 const notifDropdown = document.getElementById('notif-dropdown');
 const notifCount = document.getElementById('notif-count');
 const langToggle = document.getElementById('lang-toggle');
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
 
 // Translation System
 const translations = {
@@ -59,7 +61,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(currentUser) {
         fetchNotifications();
     }
+    initTheme();
 });
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        themeIcon.className = 'fa-solid fa-sun';
+    } else {
+        document.body.classList.remove('light-mode');
+        themeIcon.className = 'fa-solid fa-moon';
+    }
+}
 
 async function fetchUserSavedIds() {
     try {
@@ -88,6 +102,14 @@ function switchTab(tab) {
 langToggle.addEventListener('click', () => {
     currentLang = currentLang === 'en' ? 'hi' : 'en';
     applyTranslations();
+});
+
+// Theme Toggle
+themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    themeIcon.className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 });
 
 function applyTranslations() {
