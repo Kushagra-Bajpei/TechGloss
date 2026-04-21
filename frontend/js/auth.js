@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = "https://techgloss.onrender.com/api";
 
 // State
 let currentUser = JSON.parse(localStorage.getItem('user')) || null;
