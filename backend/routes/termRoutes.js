@@ -5,8 +5,40 @@ import User from '../models/User.js';
 import Comment from '../models/Comment.js';
 import Report from '../models/Report.js';
 import { protect, moderatorOnly } from '../middleware/auth.js';
+import PDFDocument from 'pdfkit';
 
 const router = express.Router();
+
+// Download all terms as PDF
+router.get('/download/pdf', async (req, res) => {
+    try {
+        const terms = await Term.find({ status: 'approved' }).sort({ name: 1 });
+        
+        const doc = new PDFDocument();
+        let filename = 'TechGloss_Terms.pdf';
+        
+        res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
+        res.setHeader('Content-type', 'application/pdf');
+        
+        doc.pipe(res);
+        
+        doc.fontSize(25).text('Technical Glossary', { align: 'center' });
+        doc.moveDown();
+        
+        terms.forEach(term => {
+            doc.fontSize(16).fillColor('black').text(term.name, { continued: true }).fillColor('gray').fontSize(12).text(`  (${term.category})`);
+            doc.fontSize(12).fillColor('black').text(`Definition: ${term.definition}`);
+            if (term.example) {
+                doc.fontSize(12).fillColor('blue').text(`Example: ${term.example}`);
+            }
+            doc.moveDown();
+        });
+        
+        doc.end();
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 // Get all approved terms
 router.get('/', async (req, res) => {
@@ -32,6 +64,18 @@ router.post('/', protect, async (req, res) => {
     const term = await Term.create({
       name, definition, example, category, author: req.user._id, status
     });
+    
+    if (status === 'pending') {
+        const moderators = await User.find({ role: 'moderator' });
+        for (const mod of moderators) {
+            mod.notifications.push({
+                message: `New term "${term.name}" submitted for review.`,
+                type: 'system'
+            });
+            await mod.save();
+        }
+    }
+
     console.log('Term created:', term.name);
     res.status(201).json(term);
   } catch (error) {
@@ -90,6 +134,16 @@ router.post('/:id/suggest', protect, async (req, res) => {
             suggestedExample,
             author: req.user._id
         });
+        
+        const moderators = await User.find({ role: 'moderator' });
+        for (const mod of moderators) {
+            mod.notifications.push({
+                message: `A new suggestion has been submitted.`,
+                type: 'system'
+            });
+            await mod.save();
+        }
+
         res.status(201).json(suggestion);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
@@ -133,6 +187,15 @@ router.put('/suggestions/:id/status', protect, moderatorOnly, async (req, res) =
             });
             user.points += 5;
             await user.save();
+        } else if (status === 'rejected') {
+            const user = await User.findById(suggestion.author);
+            if (user) {
+                user.notifications.push({
+                    message: `Your suggestion was rejected.`,
+                    type: 'system'
+                });
+                await user.save();
+            }
         }
 
         res.json(suggestion);
@@ -189,6 +252,16 @@ router.post('/:id/report', protect, async (req, res) => {
             reporter: req.user._id,
             reason: req.body.reason
         });
+        
+        const moderators = await User.find({ role: 'moderator' });
+        for (const mod of moderators) {
+            mod.notifications.push({
+                message: `A new report has been submitted.`,
+                type: 'system'
+            });
+            await mod.save();
+        }
+
         res.json({ message: 'Report submitted' });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
@@ -248,6 +321,17 @@ router.get('/me/notifications', protect, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+router.put('/me/notifications/read', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        user.notifications.forEach(n => n.read = true);
+        await user.save();
+        res.json({ message: 'Notifications marked as read' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 router.get('/pending', protect, moderatorOnly, async (req, res) => {
   try {
     const terms = await Term.find({ status: 'pending' }).populate('author', 'username');
@@ -271,6 +355,15 @@ router.put('/:id/status', protect, moderatorOnly, async (req, res) => {
                 type: 'approval'
             });
             user.points += 10;
+            await user.save();
+        }
+    } else if (status === 'rejected') {
+        const user = await User.findById(term.author);
+        if (user) {
+            user.notifications.push({
+                message: `Your term "${term.name}" has been rejected.`,
+                type: 'system'
+            });
             await user.save();
         }
     }

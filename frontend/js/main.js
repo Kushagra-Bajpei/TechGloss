@@ -13,6 +13,7 @@ const notifCount = document.getElementById('notif-count');
 const langToggle = document.getElementById('lang-toggle');
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
+const downloadPdfBtn = document.getElementById('download-pdf-btn');
 
 // Translation System
 const translations = {
@@ -126,6 +127,14 @@ function applyTranslations() {
 // Search & Filter Listeners
 searchInput.addEventListener('input', debounce(() => fetchTerms(), 500));
 categoryFilter.addEventListener('change', () => fetchTerms());
+
+// PDF Download
+if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', () => {
+        // Just open the endpoint to trigger the browser download
+        window.open(`${API_URL}/terms/download/pdf`, '_blank');
+    });
+}
 
 async function fetchTerms() {
     renderSkeletons(termsGrid);
@@ -426,9 +435,17 @@ async function fetchNotifications() {
     } catch (err) {}
 }
 
-notifBtn.addEventListener('click', () => {
+notifBtn.addEventListener('click', async () => {
     notifDropdown.classList.toggle('active');
-    // Mark as read in a real app
+    if (notifDropdown.classList.contains('active')) {
+        try {
+            await aFetch(`${API_URL}/terms/me/notifications/read`, { method: 'PUT' });
+            notifCount.style.display = 'none';
+            notifCount.innerText = '0';
+        } catch (err) {
+            console.error('Failed to mark notifications as read', err);
+        }
+    }
 });
 
 // Admin Functions Upgrade
